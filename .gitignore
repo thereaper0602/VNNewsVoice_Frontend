@@ -17,4 +17,13 @@ psd
 thumb
 sketch
 
+/.idea
+/.vscode
+.env
+.env.test
+.env.development
+.env.production
+.env.staging
+
+
 # End of https://www.toptal.com/developers/gitignore/api/react
