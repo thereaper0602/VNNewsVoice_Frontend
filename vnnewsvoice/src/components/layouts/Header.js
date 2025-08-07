@@ -85,7 +85,7 @@ const Header = () => {
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                             <Button variant="outline-success" type="submit">
-                                <i className="bi bi-search me-1"></i> Tìm kiếm
+                                <i className="bi bi-search me-1"></i>
                             </Button>
                         </Form>
                     </Navbar.Collapse>

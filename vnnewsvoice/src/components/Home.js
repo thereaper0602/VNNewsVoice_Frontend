@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Container, Row, Col, Card, Button, Pagination } from 'react-bootstrap';
 import Apis, { endpoints } from '../configs/Apis';
 import { SearchContext } from '../App';
+import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
     const [articles, setArticles] = useState([]);
@@ -10,6 +11,7 @@ const Home = () => {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const navigate = useNavigate();
     
     // Sử dụng Context API để lấy trạng thái tìm kiếm và danh mục
     const { searchTerm, selectedCategory } = useContext(SearchContext);
@@ -40,6 +42,12 @@ const Home = () => {
             setLoading(false);
         }
     }
+
+    const handleArticleClick = (article) => {
+        if(article && article.id && article.slug){
+            navigate(`/${article.slug}_${article.id}`);
+        }
+    };
     
     const getCategories = async () => {
         try {
@@ -125,7 +133,10 @@ const Home = () => {
                     {articles && articles.length > 0 ? (
                         articles.map((article, index) => (
                             <Col key={article.id || index}>
-                                <Card className="h-100 shadow-sm">
+                                <Card className="h-100 shadow-sm"
+                                onClick={() => handleArticleClick(article)} 
+                                style={{cursor: 'pointer'}}
+                                >
                                     <div className="card-img-top d-flex align-items-center justify-content-center bg-light" style={{ height: '180px' }}>
                                         {article.topImageUrl ? (
                                             <img 
@@ -159,7 +170,7 @@ const Home = () => {
                                                 {article.publishedDate ? new Date(article.publishedDate).toLocaleDateString() : 'Unknown date'}
                                             </small>
                                             <div>
-                                                {article.audioUrl && (
+                                                {/* {article.audioUrl && (
                                                     <Button 
                                                         variant="outline-success" 
                                                         size="sm" 
@@ -169,15 +180,15 @@ const Home = () => {
                                                     >
                                                         <i className="bi bi-volume-up"></i> Listen
                                                     </Button>
-                                                )}
-                                                <Button 
+                                                )} */}
+                                                {/* <Button 
                                                     variant="outline-primary" 
                                                     size="sm"
                                                     href={article.originalUrl}
                                                     target="_blank"
                                                 >
-                                                    Read More
-                                                </Button>
+                                                    Read original
+                                                </Button> */}
                                             </div>
                                         </div>
                                     </Card.Footer>

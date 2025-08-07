@@ -4,8 +4,8 @@ const BASE_URL = 'http://localhost:8080/api';
 
 export const endpoints = {
     'categories' : '/categories',
-    'articles' : '/articles'
-
+    'articles' : '/articles',
+    'articleDetail': (slug, id) => `/${slug}_${id}`
 }
 
 export default axios.create({

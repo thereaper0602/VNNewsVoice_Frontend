@@ -4,6 +4,7 @@ import Home from './components/Home';
 import Footer from './components/layouts/Footer';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { createContext, useState } from 'react';
+import ArticleDetail from './components/ArticleDetail';
 
 // Tạo Context để chia sẻ trạng thái tìm kiếm và danh mục
 export const SearchContext = createContext();
@@ -18,6 +19,7 @@ const App = () => {
         <Header />
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/:slug_id" element={<ArticleDetail />} />
         </Routes>
         <Footer />
       </BrowserRouter>
