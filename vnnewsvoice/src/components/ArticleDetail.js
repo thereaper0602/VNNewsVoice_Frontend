@@ -3,6 +3,9 @@ import Apis, { endpoints } from "../configs/Apis";
 import { useParams } from "react-router-dom";
 import { Alert, Col, Container, Image, Row, Spinner } from "react-bootstrap";
 import AudioPlayer from "./AudioPlayer";
+import Comments from "./Comments";
+import '../styles/RelatedArticles.css'
+import RelatedArticles from "./RelatedArticles";
 
 const ArticleDetail = () => {
     const { slug_id } = useParams();
@@ -10,6 +13,9 @@ const ArticleDetail = () => {
     const [blocks, setBlocks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [slug, setSlug] = useState("");
+    const [id, setId] = useState("");
+    const [relatedArticles, setRelatedArticles] = useState([]);
 
     const fetchArticleDetail = async () => {
         if (!slug_id) {
@@ -17,7 +23,10 @@ const ArticleDetail = () => {
         }
 
         try {
-            const response = await Apis.get(`${slug_id}`);
+            const parts = slug_id.split('_');
+            setSlug(parts[0]);
+            setId(parts[1]);
+            const response = await Apis.get(endpoints.articleDetail(parts[0], parts[1]));
             if (response.data) {
                 setArticle(response.data.article);
                 setBlocks(response.data.blocks || []);
@@ -30,9 +39,28 @@ const ArticleDetail = () => {
         }
     };
 
+    const fetchRelatedArticles = async () => {
+        if (!slug || !id) return;
+
+        try {
+            const response = await Apis.get(endpoints.relatedArticles(slug, id, 10));
+            if (response.data && response.data.relatedArticles) {
+                setRelatedArticles(response.data.relatedArticles);
+            }
+        }
+        catch (err) {
+            console.error("Error fetching related articles:", err);
+        }
+    };
+
     useEffect(() => {
         fetchArticleDetail();
+        window.scrollTo(0, 0); // Cuộn lên đầu trang khi slug_id thay đổi
     }, [slug_id]);
+
+    useEffect(() => {
+        fetchRelatedArticles();
+    }, [slug, id]);
 
     return (
         loading ? (
@@ -50,7 +78,7 @@ const ArticleDetail = () => {
         ) : (
             <Container className="my-5">
                 <Row className="justify-content-center">
-                    <Col md={6}> 
+                    <Col md={6}>
                         <h1 className="mb-4">{article.title}</h1>
                         <div className="d-flex mb-3">
                             <p className="me-3"><strong>Tác giả:</strong> {article.author}</p>
@@ -97,6 +125,10 @@ const ArticleDetail = () => {
                                 }
                             })}
                         </div>
+
+                        <Comments slug={slug} id={id} />
+                        <hr />
+                        <RelatedArticles articles={relatedArticles} />
                     </Col>
                 </Row>
             </Container>

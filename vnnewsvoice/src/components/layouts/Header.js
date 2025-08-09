@@ -8,10 +8,12 @@ import NavDropdown from 'react-bootstrap/NavDropdown';
 import { Link, useNavigate } from 'react-router-dom';
 import Apis, { endpoints } from '../../configs/Apis';
 import { SearchContext } from '../../App';
+import { AppContext } from '../../contexts/AppContext';
 
 const Header = () => {
     const [categories, setCategories] = useState([]);
     const { searchTerm, setSearchTerm, selectedCategory, setSelectedCategory } = useContext(SearchContext);
+    const { isAuthenticated, user, logout } = useContext(AppContext);
     const navigate = useNavigate();
 
     const loadCates = async () => {
@@ -68,9 +70,29 @@ const Header = () => {
                                     </NavDropdown.Item>
                                 ))}
                             </NavDropdown>
-                            <Nav.Link href="#" disabled>
-                                Link
-                            </Nav.Link>
+                            
+                            {isAuthenticated ? (
+                                <>
+                                    <NavDropdown title={user?.username || "Tài khoản"} id="user-dropdown">
+                                        <NavDropdown.Item as={Link} to="/profile">
+                                            Thông tin cá nhân
+                                        </NavDropdown.Item>
+                                        <NavDropdown.Divider />
+                                        <NavDropdown.Item onClick={logout}>
+                                            Đăng xuất
+                                        </NavDropdown.Item>
+                                    </NavDropdown>
+                                </>
+                            ) : (
+                                <>
+                                    <Link className='nav-link' to="/register">
+                                        Đăng ký tài khoản
+                                    </Link>
+                                    <Link className='nav-link' to="/login">
+                                        Đăng nhập
+                                    </Link>
+                                </>
+                            )}
                         </Nav>
                         <Form className="d-flex" onSubmit={(e) => {
                             e.preventDefault();
