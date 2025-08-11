@@ -5,11 +5,12 @@ import { AppContext } from "../contexts/AppContext";
 import useFormValidation from "../hooks/userFormValidation";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import MySpinner from "./layouts/MySpinner";
+import { GoogleLogin } from '@react-oauth/google';
 
 const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
 
-    const { login, isLoading, error, clearError, isAuthenticated, navigate } =
+    const { login, loginWithGoogle, isLoading, error, clearError, setError, isAuthenticated, navigate } =
         useContext(AppContext);
 
     const {
@@ -50,14 +51,22 @@ const Login = () => {
         });
     };
 
+    const handleGoogleLoginSuccess = async (credentialResponse) => {
+        await loginWithGoogle(credentialResponse.credential);
+    };
+
+    const handleGoogleLoginFailure = () => {
+        setError("Đăng nhập Google thất bại. Vui lòng thử lại.");
+    };
+
     return (
         <Container className="my-5">
             <Row className="justify-content-center">
                 <Col md={6} lg={5} xl={4}>
                     <h2 className="text-center mb-4">Đăng nhập</h2>
-                    
+
                     {error && <Alert variant="danger">{error}</Alert>}
-                    
+
                     <Form onSubmit={handleSubmit}>
                         <Form.Group className="mb-3">
                             <Form.Label>Tên đăng nhập</Form.Label>
@@ -111,6 +120,21 @@ const Login = () => {
                             </div>
                         )}
                     </Form>
+
+                    <div className="text-center mt-3">
+                        <p className="mb-3">Hoặc đăng nhập với</p>
+                        <div className="d-flex justify-content-center">
+                            <GoogleLogin
+                                onSuccess={handleGoogleLoginSuccess}
+                                onError={handleGoogleLoginFailure}
+                                useOneTap
+                                theme="filled_blue"
+                                text="signin_with"
+                                shape="circle"
+                                locale="vi"
+                            />
+                        </div>
+                    </div>
 
                     <div className="text-center mt-3">
                         <p>

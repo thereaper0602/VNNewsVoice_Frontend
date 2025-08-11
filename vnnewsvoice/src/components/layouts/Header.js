@@ -1,20 +1,22 @@
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useState, useContext, useRef } from 'react';
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import Form from 'react-bootstrap/Form';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Apis, { endpoints } from '../../configs/Apis';
-import { SearchContext } from '../../App';
 import { AppContext } from '../../contexts/AppContext';
+import { SearchContext } from '../../contexts/SearchContext';
 
 const Header = () => {
     const [categories, setCategories] = useState([]);
-    const { searchTerm, setSearchTerm, selectedCategory, setSelectedCategory } = useContext(SearchContext);
+    const [generators, setGenerators] = useState([]);
+    const { searchTerm, setSearchTerm, selectedCategory, setSelectedCategory, selectedGenerator, setSelectedGenerator } = useContext(SearchContext);
     const { isAuthenticated, user, logout } = useContext(AppContext);
     const navigate = useNavigate();
+    const location = useLocation();
 
     const loadCates = async () => {
         try {
@@ -26,8 +28,19 @@ const Header = () => {
         }
     }
 
+    const loadGenerators = async () => {
+        try{
+            let res = await Apis.get(endpoints["generators"]);
+            setGenerators(res.data);
+        } catch (error) {
+            console.error("Error fetching generators:", error);
+            setGenerators([]);
+        }
+    }
+
     useEffect(() => {
         loadCates();
+        loadGenerators();
     }, []);
 
     return (
@@ -46,9 +59,33 @@ const Header = () => {
                             navbarScroll
                         >
                             <Link to="/" className='nav-link'>Trang chủ</Link>
-                            <NavDropdown title="Danh mục" id="navbarScrollingDropdown">
+                            <NavDropdown title="Nguồn" id='navbarScrollingDropdown'>
                                 <NavDropdown.Item 
-                                    key="all" 
+                                    key="all"
+                                    onClick={() => {
+                                        setSelectedGenerator('');
+                                        navigate('/');
+                                    }}
+                                    active={selectedGenerator === ''}>
+                                        Tất cả nguồn
+                                </NavDropdown.Item>
+                                {generators.map(g => (
+                                    <NavDropdown.Item
+                                        key={g.id}
+                                        onClick = {() => {
+                                            console.log("Generator selected:", g.id, typeof g.id);
+                                            setSelectedGenerator(g.id);
+                                            navigate('/');
+                                        }}
+                                        active={selectedGenerator === g.id}
+                                    >
+                                        {g.name}
+                                    </NavDropdown.Item>
+                                ))}
+                            </NavDropdown>
+                            <NavDropdown title="Danh mục" id="navbarScrollingDropdown">
+                                <NavDropdown.Item
+                                    key="all"
                                     onClick={() => {
                                         setSelectedCategory('');
                                         navigate('/');
@@ -58,9 +95,10 @@ const Header = () => {
                                     Tất cả danh mục
                                 </NavDropdown.Item>
                                 {categories.map(c => (
-                                    <NavDropdown.Item 
-                                        key={c.id} 
+                                    <NavDropdown.Item
+                                        key={c.id}
                                         onClick={() => {
+                                            console.log("Category selected:", c.id, typeof c.id);
                                             setSelectedCategory(c.id);
                                             navigate('/');
                                         }}
@@ -70,7 +108,7 @@ const Header = () => {
                                     </NavDropdown.Item>
                                 ))}
                             </NavDropdown>
-                            
+
                             {isAuthenticated ? (
                                 <>
                                     <NavDropdown title={user?.username || "Tài khoản"} id="user-dropdown">
@@ -94,22 +132,27 @@ const Header = () => {
                                 </>
                             )}
                         </Nav>
-                        <Form className="d-flex" onSubmit={(e) => {
-                            e.preventDefault();
-                            navigate('/');
-                        }}>
-                            <Form.Control
-                                type="search"
-                                placeholder="Tìm kiếm bài viết..."
-                                className="me-2"
-                                aria-label="Search"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
-                            <Button variant="outline-success" type="submit">
-                                <i className="bi bi-search me-1"></i>
-                            </Button>
-                        </Form>
+                        {location.pathname !== '/search' && (
+                            <Form className="d-flex" onSubmit={(e) => {
+                                e.preventDefault();
+                                if (searchTerm.trim()) {
+                                    navigate('/search');
+                                }
+                            }}>
+                                <Form.Control
+                                    type="search"
+                                    placeholder="Tìm kiếm bài viết..."
+                                    className="me-2"
+                                    aria-label="Search"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+
+                                />
+                                <Button variant="outline-success" type="submit">
+                                    <i className="bi bi-search me-1"></i>
+                                </Button>
+                            </Form>
+                        )}
                     </Navbar.Collapse>
                 </Container>
             </Navbar>

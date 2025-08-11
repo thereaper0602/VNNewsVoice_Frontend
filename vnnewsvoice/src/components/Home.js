@@ -1,20 +1,20 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Container, Row, Col, Card, Button, Pagination } from 'react-bootstrap';
 import Apis, { endpoints } from '../configs/Apis';
-import { SearchContext } from '../App';
+
 import { useNavigate } from 'react-router-dom';
+import { SearchContext } from '../contexts/SearchContext';
 
 const Home = () => {
     const [articles, setArticles] = useState([]);
     const [pagination, setPagination] = useState({});
     const [currentPage, setCurrentPage] = useState(1);
-    const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
     
     // Sử dụng Context API để lấy trạng thái tìm kiếm và danh mục
-    const { searchTerm, selectedCategory } = useContext(SearchContext);
+    const { searchTerm, selectedCategory, selectedGenerator } = useContext(SearchContext);
 
     const getArticles = async (page = 1) =>{
         setLoading(true);
@@ -28,6 +28,12 @@ const Home = () => {
             
             if (selectedCategory) {
                 params.categoryId = selectedCategory;
+                console.log("Selected category:", selectedCategory);
+            }
+
+            if(selectedGenerator){
+                params.generatorId = selectedGenerator;
+                console.log("Selected generator:", selectedGenerator);
             }
             
             const response = await Apis.get(endpoints['articles'], { params });
@@ -49,28 +55,28 @@ const Home = () => {
         }
     };
     
-    const getCategories = async () => {
-        try {
-            const response = await Apis.get(endpoints['categories']);
-            setCategories(response.data);
-        } catch (error) {
-            console.error("Error fetching categories:", error);
-            // Không hiển thị lỗi cho danh mục, chỉ để trống
-            setCategories([]);
-        }
-    }
+    // const getCategories = async () => {
+    //     try {
+    //         const response = await Apis.get(endpoints['categories']);
+    //         setCategories(response.data);
+    //     } catch (error) {
+    //         console.error("Error fetching categories:", error);
+    //         // Không hiển thị lỗi cho danh mục, chỉ để trống
+    //         setCategories([]);
+    //     }
+    // }
 
     useEffect(() => {
         // Reset về trang 1 khi searchTerm hoặc selectedCategory thay đổi
-        if (searchTerm || selectedCategory) {
+        if (searchTerm || selectedCategory || selectedGenerator) {
             setCurrentPage(1);
             getArticles(1);
         } else {
             getArticles(currentPage);
         }
-        getCategories();
+        // getCategories();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [currentPage, searchTerm, selectedCategory]);
+    }, [currentPage, selectedCategory, selectedGenerator]);
 
     const handlePageChange = (page) => {
         setCurrentPage(page);

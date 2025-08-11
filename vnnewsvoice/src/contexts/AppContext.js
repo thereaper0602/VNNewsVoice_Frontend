@@ -91,6 +91,48 @@ const AppContextProvider = (props) => {
         }
     };
 
+    const loginWithGoogle = async (tokenId) => {
+        setIsLoading(true);
+        setError(null);
+
+        try{
+            const response = await Apis.post(endpoints["googleLogin"],{
+                tokenId: tokenId
+            });
+
+            if(response.status === 200){
+                const {token, user} = response.data;
+
+                // Store token in cookies with expiration
+                const expires = new Date();
+                expires.setDate(expires.getDate() + 1);
+
+                cookie.save("token", token, { path: "/", expires });
+
+                // Store user data in cookies
+                cookie.save("userData", JSON.stringify(user), {
+                    path: "/",
+                    expires,
+                });
+
+                userDispatch({
+                    type: USER_ACTIONS.LOGIN,
+                    payload: { user, token },
+                });
+
+                setIsLoading(false);
+                navigate("/"); // Redirect to home
+                return { success: true, message: "Đăng nhập thành công" };
+            }
+
+        }
+        catch (error) {
+            setError(error.message || "Đã xảy ra lỗi khi đăng nhập");
+            setIsLoading(false);
+            return { success: false, message: error.message || "Đăng nhập thất bại" };
+        }
+    }
+
     const logout = () => {
         // Clear cookies
         cookie.remove("token", { path: "/" });
@@ -122,6 +164,7 @@ const AppContextProvider = (props) => {
         error,
         // Auth functions
         login,
+        loginWithGoogle,
         logout,
         clearError,
     };
