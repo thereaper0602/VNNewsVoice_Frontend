@@ -1,4 +1,4 @@
-import { use, useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { SearchContext } from "../contexts/SearchContext";
 import Apis, { endpoints } from "../configs/Apis";
 import { useLocation, useNavigate } from "react-router-dom";

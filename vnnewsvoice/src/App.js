@@ -3,7 +3,6 @@ import Header from './components/layouts/Header';
 import Home from './components/Home';
 import Footer from './components/layouts/Footer';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { createContext, useState } from 'react';
 import ArticleDetail from './components/ArticleDetail';
 import Register from './components/Register';
 import Login from './components/Login';
@@ -11,6 +10,8 @@ import { AppContextProvider } from './contexts/AppContext';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { SearchContextProvider } from './contexts/SearchContext';
 import SearchArticle from './components/SearchArticle';
+import Profile from './components/Profile';
+import { RequireAuth } from './components/RequiredAuth';
 // Tạo Context để chia sẻ trạng thái tìm kiếm và danh mục
 
 const App = () => {
@@ -26,6 +27,7 @@ const App = () => {
               <Route path="/register" element={<Register />} />
               <Route path="/login" element={<Login />} />
               <Route path='/search' element={<SearchArticle />} />
+              <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
             </Routes>
             <Footer />
           </SearchContextProvider>

@@ -9,10 +9,14 @@ export const endpoints = {
     'articles' : '/articles',
     'articleDetail': (slug, id) => `articles/${slug}_${id}`,
     'comments' : (slug, id) => `articles/${slug}_${id}/comments`,
+    'postComment' : (slug, id) => `secure/${slug}_${id}/post-comment`,
     'relatedArticles' : (slug, id, limit) => `articles/${slug}_${id}/related?limit=${limit}`,
     'register' : '/user/register',
     'login' : '/user/login',
-    "googleLogin": "/user/google-login"
+    "googleLogin": "/user/google-login",
+    "profile": "/secure/profile",
+    "updateProfile" : "/secure/profile",
+    "changePassword": "/secure/change-password"
 }
 
 export const authApis = () => {

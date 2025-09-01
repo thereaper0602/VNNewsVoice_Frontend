@@ -81,8 +81,13 @@ const ArticleDetail = () => {
                     <Col md={6}>
                         <h1 className="mb-4">{article.title}</h1>
                         <div className="d-flex mb-3">
-                            <p className="me-3"><strong>Tác giả:</strong> {article.author}</p>
-                            <p><strong>Ngày đăng:</strong> {new Date(article.publishedDate).toLocaleDateString('vi-VN')}</p>
+                            <p className="me-3"><strong>Nguồn: </strong>Báo {article.generatorIdName}</p>
+                            <p><strong>Ngày xuất bản:</strong> {new Date(article.publishedDate).toLocaleDateString('vi-VN')}</p>
+                        </div>
+
+                        <div className="d-flex mb-3">
+                            <p className="me-3"><strong>Thể loại: </strong> {article.categoryIdName}</p>
+                            <p><strong>Bài viết gốc: </strong> <a href={article.originalUrl} target="_blank" rel="noopener noreferrer">Xem tại đây</a></p>
                         </div>
 
                         {article.audioUrl && (

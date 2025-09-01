@@ -12,30 +12,30 @@ const Home = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
-    
+
     // Sử dụng Context API để lấy trạng thái tìm kiếm và danh mục
     const { searchTerm, selectedCategory, selectedGenerator } = useContext(SearchContext);
 
-    const getArticles = async (page = 1) =>{
+    const getArticles = async (page = 1) => {
         setLoading(true);
         setError(null);
         try {
             const params = { page };
-            
+
             if (searchTerm) {
                 params.name = searchTerm;
             }
-            
+
             if (selectedCategory) {
                 params.categoryId = selectedCategory;
                 console.log("Selected category:", selectedCategory);
             }
 
-            if(selectedGenerator){
+            if (selectedGenerator) {
                 params.generatorId = selectedGenerator;
                 console.log("Selected generator:", selectedGenerator);
             }
-            
+
             const response = await Apis.get(endpoints['articles'], { params });
             setArticles(response.data.articles);
             setPagination(response.data.pagination);
@@ -50,11 +50,11 @@ const Home = () => {
     }
 
     const handleArticleClick = (article) => {
-        if(article && article.id && article.slug){
+        if (article && article.id && article.slug) {
             navigate(`/${article.slug}_${article.id}`);
         }
     };
-    
+
     // const getCategories = async () => {
     //     try {
     //         const response = await Apis.get(endpoints['categories']);
@@ -75,23 +75,23 @@ const Home = () => {
             getArticles(currentPage);
         }
         // getCategories();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentPage, selectedCategory, selectedGenerator]);
 
     const handlePageChange = (page) => {
         setCurrentPage(page);
     }
-    
+
     // Không cần các hàm xử lý tìm kiếm và thay đổi danh mục nữa vì đã được xử lý ở Header
 
     const renderPagination = () => {
         if (!pagination || !pagination.totalPages) return null;
-        
+
         let items = [];
         for (let i = 1; i <= pagination.totalPages; i++) {
             items.push(
-                <Pagination.Item 
-                    key={i} 
+                <Pagination.Item
+                    key={i}
                     active={i === currentPage}
                     onClick={() => handlePageChange(i)}
                 >
@@ -102,12 +102,12 @@ const Home = () => {
 
         return (
             <Pagination className="justify-content-center mt-4">
-                <Pagination.Prev 
+                <Pagination.Prev
                     disabled={currentPage === 1}
                     onClick={() => handlePageChange(currentPage - 1)}
                 />
                 {items}
-                <Pagination.Next 
+                <Pagination.Next
                     disabled={currentPage === pagination.totalPages}
                     onClick={() => handlePageChange(currentPage + 1)}
                 />
@@ -117,16 +117,16 @@ const Home = () => {
 
     return (
         <Container className="py-4">
-            
+
             {/* Phần tìm kiếm và lọc danh mục đã được chuyển sang Header */}
-            
+
             {error && (
                 <div className="alert alert-danger text-center mb-4" role="alert">
                     <i className="bi bi-exclamation-triangle-fill me-2"></i>
                     {error}
                 </div>
             )}
-            
+
             {loading ? (
                 <div className="text-center py-5">
                     <div className="spinner-border text-primary" role="status">
@@ -140,15 +140,15 @@ const Home = () => {
                         articles.map((article, index) => (
                             <Col key={article.id || index}>
                                 <Card className="h-100 shadow-sm"
-                                onClick={() => handleArticleClick(article)} 
-                                style={{cursor: 'pointer'}}
+                                    onClick={() => handleArticleClick(article)}
+                                    style={{ cursor: 'pointer' }}
                                 >
                                     <div className="card-img-top d-flex align-items-center justify-content-center bg-light" style={{ height: '180px' }}>
                                         {article.topImageUrl ? (
-                                            <img 
-                                                src={article.topImageUrl} 
-                                                alt={article.title} 
-                                                className="img-fluid" 
+                                            <img
+                                                src={article.topImageUrl}
+                                                alt={article.title}
+                                                className="img-fluid"
                                                 style={{ maxHeight: '180px', objectFit: 'cover', width: '100%' }}
                                             />
                                         ) : (
@@ -157,45 +157,27 @@ const Home = () => {
                                     </div>
                                     <Card.Body>
                                         <Card.Title>{article.title}</Card.Title>
-                                        {article.author && (
-                                            <Card.Subtitle className="mb-2 text-muted">
-                                                By {article.author}
-                                            </Card.Subtitle>
+                                        {article.generatorIdName && (
+                                            <>
+                                                <img src={article.generatorIdLogoUrl} className="me-2" style={{ width: '60px', height: '30px' }} />
+                                                <Card.Subtitle className="mb-2 text-muted">
+                                                    Nguồn :Báo {article.generatorIdName}
+                                                </Card.Subtitle>
+                                            </>
                                         )}
                                         <Card.Text>
                                             {article.summary ? (
-                                                article.summary.length > 100 ? 
-                                                `${article.summary.substring(0, 100)}...` : 
-                                                article.summary
+                                                article.summary.length > 100 ?
+                                                    `${article.summary.substring(0, 100)}...` :
+                                                    article.summary
                                             ) : 'No summary available'}
                                         </Card.Text>
                                     </Card.Body>
                                     <Card.Footer className="bg-white">
                                         <div className="d-flex justify-content-between align-items-center">
                                             <small className="text-muted">
-                                                {article.publishedDate ? new Date(article.publishedDate).toLocaleDateString() : 'Unknown date'}
+                                                Ngày xuất bản : {article.publishedDate ? new Date(article.publishedDate).toLocaleDateString() : 'Unknown date'}
                                             </small>
-                                            <div>
-                                                {/* {article.audioUrl && (
-                                                    <Button 
-                                                        variant="outline-success" 
-                                                        size="sm" 
-                                                        className="me-2"
-                                                        href={article.audioUrl}
-                                                        target="_blank"
-                                                    >
-                                                        <i className="bi bi-volume-up"></i> Listen
-                                                    </Button>
-                                                )} */}
-                                                {/* <Button 
-                                                    variant="outline-primary" 
-                                                    size="sm"
-                                                    href={article.originalUrl}
-                                                    target="_blank"
-                                                >
-                                                    Read original
-                                                </Button> */}
-                                            </div>
                                         </div>
                                     </Card.Footer>
                                 </Card>
@@ -208,7 +190,7 @@ const Home = () => {
                     )}
                 </Row>
             )}
-            
+
             {renderPagination()}
         </Container>
     );
