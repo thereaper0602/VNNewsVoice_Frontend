@@ -1,21 +1,39 @@
-import { useEffect, useState } from "react";
-import Apis, { endpoints } from "../configs/Apis";
+import { useContext, useEffect, useState } from "react";
+import Apis, { authApis, endpoints } from "../configs/Apis";
 import { useParams } from "react-router-dom";
-import { Alert, Col, Container, Image, Row, Spinner } from "react-bootstrap";
+import { Alert, Button, Col, Container, Image, Row, Spinner } from "react-bootstrap";
 import AudioPlayer from "./AudioPlayer";
 import Comments from "./Comments";
 import '../styles/RelatedArticles.css'
 import RelatedArticles from "./RelatedArticles";
+import { AppContext } from "../contexts/AppContext";
+import ModalLogin from "./ModalLogin";
 
 const ArticleDetail = () => {
     const { slug_id } = useParams();
     const [article, setArticle] = useState(null);
+    const [liked, setIsLiked] = useState(false);
+    const [totalLike, setTotalLike] = useState(0);
     const [blocks, setBlocks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [slug, setSlug] = useState("");
     const [id, setId] = useState("");
     const [relatedArticles, setRelatedArticles] = useState([]);
+    const [showLoginModal, setShowLoginModal] = useState(false);
+    const {isAuthenticated, login, loginWithGoogle} = useContext(AppContext);
+
+    const fetchTotalArticleLike = async (slug, id) => {
+        try{
+            const response = await Apis.get(endpoints.totalArticleLike(slug, id));
+            if(response.data){
+                setTotalLike(response.data.totalLike);
+            }
+        } catch (err){
+            console.log(err)
+            setError("Lỗi khi lấy tổng số lượt thích bài viết.");
+        }
+    }
 
     const fetchArticleDetail = async () => {
         if (!slug_id) {
@@ -39,6 +57,26 @@ const ArticleDetail = () => {
         }
     };
 
+    const checkIsLikedArticle = async (slug, id) => {
+        if(!isAuthenticated || !slug || !id) {
+            return;
+        }
+
+        try{
+            const response = await authApis().get(endpoints.isLikedArticle(slug, id));
+            if(response.data.isLiked === true){
+                setIsLiked(response.data.isLiked);
+            }
+            else {
+                setIsLiked(false);
+            }
+        } catch(err){
+            console.error("Error checking if article is liked:", err);
+            setError("Lỗi khi kiểm tra trạng thái thích bài viết.");
+        }
+
+    }
+
     const fetchRelatedArticles = async () => {
         if (!slug || !id) return;
 
@@ -53,6 +91,32 @@ const ArticleDetail = () => {
         }
     };
 
+    const handleLikeArticle = async () => {
+        if(!isAuthenticated){
+            setShowLoginModal(true);
+            return;
+        }
+
+        try{
+            if(liked) {
+                const response = await authApis().delete(endpoints.deleteArticleLike(slug, id));
+                if(response.status === 204){
+                    setTotalLike(prev => prev - 1);
+                    setIsLiked(false);
+                }
+            }
+            else{
+                const response = await authApis().post(endpoints.addArticleLike(slug, id));
+                if(response.status === 201){
+                    setTotalLike(prev => prev + 1);
+                    setIsLiked(true);
+                }
+            }
+        } catch (err) {
+            console.error("Error liking article:", err);
+        }
+    };
+
     useEffect(() => {
         fetchArticleDetail();
         window.scrollTo(0, 0); // Cuộn lên đầu trang khi slug_id thay đổi
@@ -61,6 +125,13 @@ const ArticleDetail = () => {
     useEffect(() => {
         fetchRelatedArticles();
     }, [slug, id]);
+
+    useEffect(() => {
+        if(slug && id) {
+            fetchTotalArticleLike(slug, id);
+            checkIsLikedArticle(slug, id);
+        }
+    },[slug, id]);
 
     return (
         loading ? (
@@ -83,6 +154,8 @@ const ArticleDetail = () => {
                         <div className="d-flex mb-3">
                             <p className="me-3"><strong>Nguồn: </strong>Báo {article.generatorIdName}</p>
                             <p><strong>Ngày xuất bản:</strong> {new Date(article.publishedDate).toLocaleDateString('vi-VN')}</p>
+                            <p className="ms-3"><strong>Lượt thích: </strong> {totalLike}</p>
+                            <Button className = "ms-3" variant={liked ? 'primary' : 'outline-primary'} onClick={handleLikeArticle}>{liked ? 'Đã thích' : 'Thích'}</Button>
                         </div>
 
                         <div className="d-flex mb-3">
@@ -136,6 +209,7 @@ const ArticleDetail = () => {
                         <RelatedArticles articles={relatedArticles} />
                     </Col>
                 </Row>
+                <ModalLogin show={showLoginModal} onHide={() => setShowLoginModal(false)} />
             </Container>
         )
     );

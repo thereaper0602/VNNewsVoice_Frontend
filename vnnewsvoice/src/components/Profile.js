@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import MySpinner from "./layouts/MySpinner";
 import "../styles/Profile.css";
-import { authApis } from "../configs/Apis";
+import { authApis, endpoints } from "../configs/Apis";
 import { Alert } from "react-bootstrap";
 
 // Import các component con
@@ -23,7 +23,7 @@ const Profile = () => {
     useEffect(() => {
         const fetchUserProfile = async () => {
             try {
-                const response = await authApis().get('/secure/profile');
+                const response = await authApis().get(endpoints.profile);
                 const userData = response.data;
                 setUserProfile(response.data);
 
