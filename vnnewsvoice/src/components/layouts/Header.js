@@ -48,7 +48,8 @@ const Header = () => {
             <Navbar expand="lg" className="bg-body-tertiary">
                 <Container fluid>
                     <Navbar.Brand as={Link} to="/">
-                        <i className="bi bi-soundwave text-primary me-2"></i>
+                        {/* <i className="bi bi-soundwave text-primary me-2"></i> */}
+                        <img src='https://res.cloudinary.com/dg66aou8q/image/upload/v1756891972/trans_bg_logo_glvmry.png' style={{width : "80px", height:"50px"}}/>
                         VN News Voice
                     </Navbar.Brand>
                     <Navbar.Toggle aria-controls="navbarScroll" />
